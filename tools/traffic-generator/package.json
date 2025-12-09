@@ -1,0 +1,22 @@
+{
+  "name": "traffic-generator",
+  "version": "2.0.0",
+  "description": "FAANG-level traffic generator for Smart Gateway Platform",
+  "type": "module",
+  "main": "advanced-generator.js",
+  "scripts": {
+    "start": "bun run advanced-generator.js",
+    "start:basic": "bun run generator.js",
+    "start:native": "bun run generator-bun.js",
+    "demo": "MODE=demo bun run advanced-generator.js",
+    "realistic": "MODE=realistic bun run advanced-generator.js",
+    "steady": "MODE=steady bun run advanced-generator.js",
+    "ramp-up": "MODE=ramp-up bun run advanced-generator.js",
+    "spike": "MODE=spike bun run advanced-generator.js",
+    "dev": "bun --watch advanced-generator.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.2"
+  }
+}
+

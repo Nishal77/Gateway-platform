@@ -1,0 +1,37 @@
+server:
+  port: 8083
+  netty:
+    event-loop-threads: 0
+    connection-timeout: 10000
+    idle-timeout: 60000
+
+spring:
+  application:
+    name: payment-service
+  codec:
+    max-in-memory-size: 10MB
+
+service:
+  latency:
+    min-ms: 25
+    max-ms: 250
+  error-rate: 0.05
+
+spring.threads:
+  virtual:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.sgp.payment: INFO
+    reactor.netty: WARN

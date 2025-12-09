@@ -1,0 +1,26 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: payment-service
+
+service:
+  latency:
+    min-ms: 50
+    max-ms: 500
+  error-rate: 0.05
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.sgp.payment: INFO
+

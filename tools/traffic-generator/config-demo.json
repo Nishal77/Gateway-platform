@@ -1,0 +1,9 @@
+{
+  "gatewayUrl": "http://gateway:8080",
+  "rps": 25,
+  "duration": 200,
+  "apiKey": "test-api-key-12345",
+  "mode": "demo",
+  "concurrentUsers": 15
+}
+

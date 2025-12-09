@@ -1,0 +1,102 @@
+server:
+  port: 8080
+  netty:
+    event-loop-threads: 0
+    connection-timeout: 10000
+    idle-timeout: 60000
+
+spring:
+  application:
+    name: analytics-service
+  
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:analytics_db}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    # Industry-grade connection pooling for high throughput
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      pool-name: AnalyticsHikariPool
+      # Optimize for batch inserts
+      data-source-properties:
+        reWriteBatchedInserts: true
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        # Industry-grade batch processing for millions of inserts per second
+        jdbc:
+          batch_size: 1000
+          order_inserts: true
+          order_updates: true
+        # Optimize for high-throughput writes
+        jdbc.batch_versioned_data: true
+        # Disable unnecessary features for performance
+        generate_statistics: false
+        use_sql_comments: false
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 200
+          max-idle: 100
+          min-idle: 20
+          max-wait: 5000ms
+        # Optimize for high throughput
+        shutdown-timeout: 200ms
+
+analytics:
+  metrics:
+    window-seconds: 60
+    aggregation-interval-ms: 1000  # More frequent updates for real-time feel
+    cache-ttl-minutes: 5
+  # Async processing configuration - optimized for high throughput
+  batch:
+    size: 5000
+    flush-interval-ms: 500
+  queue:
+    capacity: 1000000
+  workers: 8
+
+# Enable async processing
+spring.task:
+  execution:
+    pool:
+      core-size: 8
+      max-size: 16
+      queue-capacity: 10000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.sgp.analytics: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+

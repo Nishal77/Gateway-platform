@@ -1,0 +1,86 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: analytics-service
+  
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:postgres}:${POSTGRES_PORT:5432}/${POSTGRES_DB:sgp}
+    username: ${POSTGRES_USER:sgp}
+    password: ${POSTGRES_PASSWORD:sgp}
+    driver-class-name: org.postgresql.Driver
+    # FAANG-level connection pooling
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      pool-name: AnalyticsHikariPool
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        # Batch processing for high throughput
+        jdbc:
+          batch_size: 1000
+          order_inserts: true
+          order_updates: true
+        jdbc.batch_versioned_data: true
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 100
+          max-idle: 50
+          min-idle: 10
+          max-wait: 5000ms
+
+analytics:
+  metrics:
+    window-seconds: 60
+    aggregation-interval-ms: 10000
+    cache-ttl-minutes: 5
+  # Async processing configuration
+  batch:
+    size: 1000
+    flush-interval-ms: 1000
+  queue:
+    capacity: 100000
+  workers: 4
+
+# Enable async processing
+spring.task:
+  execution:
+    pool:
+      core-size: 8
+      max-size: 16
+      queue-capacity: 10000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.sgp.analytics: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+

@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+
+service:
+  latency:
+    min-ms: 10
+    max-ms: 100
+  error-rate: 0.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.sgp.user: INFO
+

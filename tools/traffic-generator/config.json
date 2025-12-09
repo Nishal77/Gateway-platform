@@ -1,0 +1,43 @@
+{
+  "gatewayUrl": "http://localhost:20007",
+  "rps": 10,
+  "duration": 60,
+  "apiKey": "test-api-key-12345",
+  "burstMode": false,
+  "burstSize": 50,
+  "endpoints": [
+    {
+      "path": "/api/users",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/2",
+      "method": "GET"
+    },
+    {
+      "path": "/api/orders",
+      "method": "GET"
+    },
+    {
+      "path": "/api/orders/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/payments",
+      "method": "GET"
+    },
+    {
+      "path": "/api/payments",
+      "method": "POST",
+      "body": {
+        "amount": 99.99,
+        "status": "PENDING"
+      }
+    }
+  ]
+}
+

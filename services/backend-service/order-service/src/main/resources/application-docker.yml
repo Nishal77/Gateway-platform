@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: order-service
+
+service:
+  latency:
+    min-ms: 20
+    max-ms: 200
+  error-rate: 0.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.sgp.order: INFO
+

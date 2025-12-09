@@ -1,0 +1,9 @@
+# Bun configuration for dashboard project
+# This file is automatically sourced by Bun
+
+# Ensure Bun bin is in PATH
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+
+

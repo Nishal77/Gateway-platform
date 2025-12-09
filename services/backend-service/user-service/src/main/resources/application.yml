@@ -1,0 +1,45 @@
+server:
+  port: 8081
+  # FAANG-level configuration
+  netty:
+    # Increase event loop threads for high concurrency
+    event-loop-threads: 0  # 0 = auto-detect (2 * CPU cores)
+    connection-timeout: 10000
+    idle-timeout: 60000
+
+spring:
+  application:
+    name: user-service
+  # Reactive configuration
+  codec:
+    max-in-memory-size: 10MB
+
+service:
+  latency:
+    min-ms: 5  # Reduced for FAANG-level performance
+    max-ms: 50
+  error-rate: 0.0
+
+# Thread pool configuration for blocking operations
+spring.threads:
+  virtual:
+    enabled: true  # Use virtual threads (Java 21+) for better scalability
+
+# Actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.sgp.user: INFO
+    reactor.netty: WARN  # Reduce noise from Netty
