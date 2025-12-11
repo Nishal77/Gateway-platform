@@ -18,7 +18,7 @@ export const options = {
   },
 };
 
-const GATEWAY_URL = __ENV.GATEWAY_URL || 'http://localhost:8080';
+const GATEWAY_URL = __ENV.GATEWAY_URL || 'http://localhost:20007';
 const API_KEY = __ENV.API_KEY || 'test-api-key-12345';
 
 const endpoints = [

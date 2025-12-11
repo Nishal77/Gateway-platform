@@ -1,5 +1,9 @@
 server:
   port: 8080
+  netty:
+    event-loop-threads: 0  # Use default (2 * CPU cores)
+    connection-timeout: 10000
+    idle-timeout: 60000
 
 spring:
   application:
@@ -24,9 +28,10 @@ spring:
       timeout: 2000ms
       lettuce:
         pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
+          max-active: 200
+          max-idle: 100
+          min-idle: 20
+          max-wait: 5000ms
 
 gateway:
   auth:
@@ -41,9 +46,14 @@ gateway:
   
   telemetry:
     enabled: ${GATEWAY_TELEMETRY_ENABLED:true}
-    analytics-url: ${ANALYTICS_SERVICE_URL:http://analytics-service:9000/api/v1/telemetry}
-    batch-size: ${GATEWAY_TELEMETRY_BATCH_SIZE:100}
-    batch-flush-interval-ms: 1000
+    analytics-url: ${ANALYTICS_SERVICE_URL:http://analytics:9000/api/v1/telemetry}
+    batch-size: ${GATEWAY_TELEMETRY_BATCH_SIZE:1000}
+    batch-flush-interval-ms: 500
+    queue-capacity: ${GATEWAY_TELEMETRY_QUEUE_CAPACITY:100000}
+
+# WebClient configuration for high throughput
+spring.codec:
+  max-in-memory-size: 10MB
 
 resilience4j:
   circuitbreaker:

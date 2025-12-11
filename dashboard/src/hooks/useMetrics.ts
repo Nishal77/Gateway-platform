@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { api, MetricAggregation } from '../lib/api'
 
-export function useMetrics(refreshInterval: number = 1000) {
+export function useMetrics(refreshInterval: number = 2000) {
   const [metrics, setMetrics] = useState<MetricAggregation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)

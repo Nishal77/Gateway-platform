@@ -13,6 +13,9 @@
     "steady": "MODE=steady bun run advanced-generator.js",
     "ramp-up": "MODE=ramp-up bun run advanced-generator.js",
     "spike": "MODE=spike bun run advanced-generator.js",
+    "load-1k": "bun run load-1k.js",
+    "load-10k": "bun run load-10k.js",
+    "load-100k": "bun run load-100k.js",
     "dev": "bun --watch advanced-generator.js"
   },
   "dependencies": {

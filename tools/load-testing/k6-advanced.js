@@ -35,7 +35,7 @@ export const options = {
   },
 };
 
-const BASE_URL = __ENV.GATEWAY_URL || 'http://localhost:18080';
+const BASE_URL = __ENV.GATEWAY_URL || 'http://localhost:20007';
 const API_KEY = __ENV.API_KEY || 'test-api-key-12345';
 
 // Test data generators
@@ -173,7 +173,7 @@ export default function () {
 
 // Setup function - runs once before all VUs
 export function setup() {
-  console.log(`🚀 Starting K6 Load Test`);
+  console.log(`Starting K6 Load Test`);
   console.log(`   Gateway URL: ${BASE_URL}`);
   console.log(`   API Key: ${API_KEY.substring(0, 10)}...`);
   console.log(`   Stages: ${JSON.stringify(options.stages)}\n`);
@@ -181,6 +181,6 @@ export function setup() {
 
 // Teardown function - runs once after all VUs finish
 export function teardown(data) {
-  console.log('\n✅ Load test completed');
+  console.log('\nLoad test completed');
 }
 

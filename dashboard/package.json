@@ -8,7 +8,7 @@
     "build": "bun tsc && bun vite build",
     "preview": "bun vite preview",
     "lint": "bun eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "postinstall": "echo '✓ Dependencies installed. Run: source setup.sh (or restart your terminal)'"
+    "postinstall": "echo 'Dependencies installed. Run: source setup.sh (or restart your terminal)'"
   },
   "dependencies": {
     "react": "^18.2.0",

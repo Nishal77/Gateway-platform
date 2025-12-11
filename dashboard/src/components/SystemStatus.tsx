@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from './Card'
 import { api } from '../lib/api'
 import { formatRPS } from '../utils/formatNumbers'
+import { Activity, AlertTriangle, CheckCircle, XCircle, TrendingUp } from 'lucide-react'
 
 interface SystemStatus {
   status: 'healthy' | 'degraded' | 'overloaded' | 'critical'
@@ -11,7 +12,10 @@ interface SystemStatus {
   p99Latency: number
   capacity: number
   message: string
+  targetCapacity: number
 }
+
+const TARGET_RPS = 10000 // Target capacity for 10k RPS
 
 export function SystemStatus() {
   const [status, setStatus] = useState<SystemStatus>({
@@ -20,8 +24,9 @@ export function SystemStatus() {
     errorRate: 0,
     avgLatency: 0,
     p99Latency: 0,
-    capacity: 100,
+    capacity: 0,
     message: 'Waiting for traffic...',
+    targetCapacity: TARGET_RPS,
   })
 
   useEffect(() => {
@@ -29,13 +34,11 @@ export function SystemStatus() {
       try {
         const metrics = await api.getAggregatedMetrics()
 
-        // Calculate real metrics from actual telemetry data
         const totalRps = metrics.reduce((sum, m) => sum + m.rps, 0)
         const totalRequests = metrics.reduce((sum, m) => sum + m.requestCount, 0)
         const totalErrors = metrics.reduce((sum, m) => sum + m.errorCount, 0)
         const avgErrorRate = totalRequests > 0 ? (totalErrors / totalRequests) * 100 : 0
         
-        // Calculate weighted average latency (weighted by request count)
         let totalWeightedLatency = 0
         let totalWeight = 0
         let maxP99Latency = 0
@@ -51,43 +54,29 @@ export function SystemStatus() {
         const avgLatency = totalWeight > 0 ? totalWeightedLatency / totalWeight : 0
         const p99Latency = maxP99Latency
 
-        // Determine system status based on real metrics
-        let systemStatus: 'healthy' | 'degraded' | 'overloaded' | 'critical' = 'healthy'
-        let capacity = 100
-        let message = 'Waiting for traffic...'
+        // Calculate capacity percentage based on RPS (0-10k RPS = 0-100%)
+        const capacityPercent = Math.min((totalRps / TARGET_RPS) * 100, 100)
 
-        // Only evaluate status if there's actual traffic
+        // Determine system status
+        let systemStatus: 'healthy' | 'degraded' | 'overloaded' | 'critical' = 'healthy'
+        let message = 'System operating normally'
+
         if (totalRps > 0) {
-          if (avgErrorRate > 10 || p99Latency > 2000) {
+          if (avgErrorRate > 10 || p99Latency > 2000 || capacityPercent >= 95) {
             systemStatus = 'critical'
-            capacity = 0
             message = 'System under critical load - immediate attention required'
-          } else if (avgErrorRate > 5 || p99Latency > 1000 || totalRps > 1000000) {
+          } else if (avgErrorRate > 5 || p99Latency > 1000 || capacityPercent >= 80) {
             systemStatus = 'overloaded'
-            capacity = 25
             message = 'System experiencing high load - performance degraded'
-          } else if (avgErrorRate > 1 || p99Latency > 500 || totalRps > 500000) {
+          } else if (avgErrorRate > 1 || p99Latency > 500 || capacityPercent >= 60) {
             systemStatus = 'degraded'
-            capacity = 60
             message = 'System under moderate load - monitoring recommended'
           } else {
             systemStatus = 'healthy'
-            capacity = 100
             message = 'System operating normally'
           }
-
-          // Calculate capacity based on RPS (industry-standard thresholds)
-          if (totalRps < 100000) {
-            capacity = 100
-          } else if (totalRps < 500000) {
-            capacity = 80
-          } else if (totalRps < 1000000) {
-            capacity = 50
-          } else if (totalRps < 5000000) {
-            capacity = 30
           } else {
-            capacity = 10
-          }
+          message = 'Waiting for traffic...'
         }
 
         setStatus({
@@ -96,8 +85,9 @@ export function SystemStatus() {
           errorRate: avgErrorRate,
           avgLatency,
           p99Latency,
-          capacity,
+          capacity: capacityPercent,
           message,
+          targetCapacity: TARGET_RPS,
         })
       } catch (error) {
         setStatus({
@@ -108,119 +98,197 @@ export function SystemStatus() {
           p99Latency: 0,
           capacity: 0,
           message: 'Unable to fetch system status',
+          targetCapacity: TARGET_RPS,
         })
       }
     }
 
     fetchStatus()
-    const interval = setInterval(fetchStatus, 2000)
+    const interval = setInterval(fetchStatus, 1000)
 
     return () => clearInterval(interval)
   }, [])
 
-  const getStatusColor = () => {
+  const getStatusConfig = () => {
     switch (status.status) {
       case 'healthy':
-        return 'text-green-500'
+        return {
+          color: 'text-green-600',
+          bgColor: 'bg-green-50',
+          borderColor: 'border-green-200',
+          icon: CheckCircle,
+          iconColor: 'text-green-500',
+        }
       case 'degraded':
-        return 'text-yellow-500'
+        return {
+          color: 'text-yellow-600',
+          bgColor: 'bg-yellow-50',
+          borderColor: 'border-yellow-200',
+          icon: AlertTriangle,
+          iconColor: 'text-yellow-500',
+        }
       case 'overloaded':
-        return 'text-orange-500'
+        return {
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-50',
+          borderColor: 'border-orange-200',
+          icon: AlertTriangle,
+          iconColor: 'text-orange-500',
+        }
       case 'critical':
-        return 'text-red-500'
+        return {
+          color: 'text-red-600',
+          bgColor: 'bg-red-50',
+          borderColor: 'border-red-200',
+          icon: XCircle,
+          iconColor: 'text-red-500',
+        }
       default:
-        return 'text-gray-500'
+        return {
+          color: 'text-gray-600',
+          bgColor: 'bg-gray-50',
+          borderColor: 'border-gray-200',
+          icon: Activity,
+          iconColor: 'text-gray-500',
+        }
     }
   }
 
-  const getCapacityColor = () => {
-    if (status.capacity >= 80) return 'text-green-500'
-    if (status.capacity >= 50) return 'text-yellow-500'
-    if (status.capacity >= 25) return 'text-orange-500'
-    return 'text-red-500'
+  const getProgressColor = () => {
+    if (status.capacity >= 90) return 'bg-red-500'
+    if (status.capacity >= 70) return 'bg-orange-500'
+    if (status.capacity >= 50) return 'bg-yellow-500'
+    return 'bg-green-500'
   }
 
+  const config = getStatusConfig()
+  const StatusIcon = config.icon
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>System Status</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex items-center justify-center">
-            <div className="relative w-32 h-32">
-              <svg className="transform -rotate-90 w-32 h-32">
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  className="text-gray-200"
-                />
-                <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 56}`}
-                  strokeDashoffset={`${2 * Math.PI * 56 * (1 - status.capacity / 100)}`}
-                  className={getCapacityColor()}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className={`text-2xl font-bold ${getStatusColor()}`}>
-                    {status.capacity}%
-                  </div>
-                  <div className="text-xs text-muted-foreground">Capacity</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <div className={`text-lg font-semibold ${getStatusColor()} mb-1`}>
-              {status.status.toUpperCase()}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {status.message}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-            <div>
-              <div className="text-xs text-muted-foreground">Current RPS</div>
-              <div className="text-lg font-semibold">
-                {formatRPS(status.rps)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">Error Rate</div>
-              <div className={`text-lg font-semibold ${status.errorRate > 5 ? 'text-red-500' : status.errorRate > 1 ? 'text-yellow-500' : 'text-green-500'}`}>
-                {status.errorRate.toFixed(2)}%
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">Avg Latency</div>
-              <div className="text-lg font-semibold">
-                {status.avgLatency.toFixed(0)}ms
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">P99 Latency</div>
-              <div className={`text-lg font-semibold ${status.p99Latency > 1000 ? 'text-red-500' : status.p99Latency > 500 ? 'text-yellow-500' : 'text-green-500'}`}>
-                {status.p99Latency.toFixed(0)}ms
-              </div>
-            </div>
+    <Card className={`${config.borderColor} border-2`}>
+      <CardHeader className={`${config.bgColor} pb-3`}>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <StatusIcon className={`h-5 w-5 ${config.iconColor}`} />
+            System Status
+          </CardTitle>
+          <div className={`px-3 py-1 rounded-full text-sm font-semibold ${config.bgColor} ${config.color} border ${config.borderColor}`}>
+            {status.status.toUpperCase()}
           </div>
         </div>
+      </CardHeader>
+      <CardContent className="space-y-6 pt-6">
+        {/* Capacity Progress Bar */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-gray-700">System Capacity</span>
+            <span className={`font-bold ${config.color}`}>
+              {status.capacity.toFixed(1)}%
+            </span>
+                  </div>
+          <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+            <div
+              className={`h-full ${getProgressColor()} transition-all duration-500 ease-out rounded-full flex items-center justify-end pr-2`}
+              style={{ width: `${Math.min(status.capacity, 100)}%` }}
+            >
+              {status.capacity > 10 && (
+                <span className="text-xs font-semibold text-white">
+                  {status.capacity.toFixed(0)}%
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>0 RPS</span>
+            <span className="font-medium">{formatRPS(status.targetCapacity)} Target</span>
+          </div>
+        </div>
+
+        {/* RPS Progress Indicator */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-gray-700 flex items-center gap-1">
+              <TrendingUp className="h-4 w-4" />
+              Current Load
+            </span>
+            <span className="font-bold text-blue-600">
+              {formatRPS(status.rps)}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div
+              className="h-full bg-blue-500 transition-all duration-500 ease-out rounded-full"
+              style={{ width: `${Math.min((status.rps / status.targetCapacity) * 100, 100)}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Status Message */}
+        <div className={`p-3 rounded-lg ${config.bgColor} border ${config.borderColor}`}>
+          <p className={`text-sm ${config.color} font-medium`}>
+            {status.message}
+          </p>
+          </div>
+
+        {/* Key Metrics Grid */}
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+          <div className="space-y-1">
+            <div className="text-xs text-gray-500">Error Rate</div>
+            <div className={`text-lg font-semibold ${
+              status.errorRate > 5 ? 'text-red-500' : 
+              status.errorRate > 1 ? 'text-yellow-500' : 
+              'text-green-500'
+            }`}>
+              {status.errorRate.toFixed(2)}%
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-xs text-gray-500">Avg Latency</div>
+            <div className={`text-lg font-semibold ${
+              status.avgLatency > 1000 ? 'text-red-500' : 
+              status.avgLatency > 500 ? 'text-yellow-500' : 
+              'text-green-500'
+            }`}>
+              {status.avgLatency.toFixed(0)}ms
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-xs text-gray-500">P99 Latency</div>
+            <div className={`text-lg font-semibold ${
+              status.p99Latency > 2000 ? 'text-red-500' : 
+              status.p99Latency > 1000 ? 'text-orange-500' : 
+              status.p99Latency > 500 ? 'text-yellow-500' : 
+              'text-green-500'
+            }`}>
+              {status.p99Latency.toFixed(0)}ms
+            </div>
+              </div>
+          <div className="space-y-1">
+            <div className="text-xs text-gray-500">Capacity Used</div>
+            <div className={`text-lg font-semibold ${config.color}`}>
+              {status.capacity.toFixed(1)}%
+            </div>
+              </div>
+            </div>
+
+        {/* Capacity Warning */}
+        {status.capacity >= 80 && (
+          <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-800">
+                  High Capacity Usage
+                </p>
+                <p className="text-xs text-red-600 mt-1">
+                  System is operating at {status.capacity.toFixed(1)}% capacity. 
+                  Consider scaling if load continues to increase.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
 }
-

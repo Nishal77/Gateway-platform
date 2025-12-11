@@ -36,5 +36,20 @@ EXPOSE 9000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:9000/health || exit 1
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# JVM optimizations for high throughput analytics processing
+# -XX:+UseG1GC: Use G1 garbage collector
+# -XX:MaxGCPauseMillis: Target GC pause time
+# -Xmx: Maximum heap size (analytics needs more memory for buffering)
+# -Xms: Initial heap size
+# -XX:+UseStringDeduplication: Reduce memory usage
+# -XX:+ParallelRefProcEnabled: Parallel reference processing
+ENTRYPOINT ["java", \
+  "-XX:+UseG1GC", \
+  "-XX:MaxGCPauseMillis=200", \
+  "-Xmx1g", \
+  "-Xms1g", \
+  "-XX:+UseStringDeduplication", \
+  "-XX:+ParallelRefProcEnabled", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-jar", "app.jar"]
 

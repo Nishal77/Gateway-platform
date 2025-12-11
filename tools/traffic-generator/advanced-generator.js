@@ -214,7 +214,7 @@ class AdvancedTrafficGenerator {
     const interval = 1000 / this.config.rps;
     const endTime = Date.now() + (this.config.duration * 1000);
     
-    console.log(`📊 Mode: STEADY | RPS: ${this.config.rps} | Duration: ${this.config.duration}s\n`);
+    console.log(`Mode: STEADY | RPS: ${this.config.rps} | Duration: ${this.config.duration}s\n`);
 
     while (Date.now() < endTime && this.running) {
       await this.executeRandomRequest();
@@ -233,7 +233,7 @@ class AdvancedTrafficGenerator {
     const stepDuration = (this.config.duration * 1000) / rampSteps;
     const rpsIncrement = this.config.rps / rampSteps;
     
-    console.log(`📈 Mode: RAMP-UP | Max RPS: ${this.config.rps} | Duration: ${this.config.duration}s\n`);
+    console.log(`Mode: RAMP-UP | Max RPS: ${this.config.rps} | Duration: ${this.config.duration}s\n`);
 
     let currentRps = 1;
     let stepStart = Date.now();
@@ -242,7 +242,7 @@ class AdvancedTrafficGenerator {
       if (Date.now() - stepStart >= stepDuration && currentRps < this.config.rps) {
         currentRps = Math.min(currentRps + rpsIncrement, this.config.rps);
         stepStart = Date.now();
-        console.log(`⬆️  Ramping up to ${currentRps.toFixed(1)} RPS`);
+        console.log(`Ramping up to ${currentRps.toFixed(1)} RPS`);
       }
 
       const interval = 1000 / currentRps;
@@ -262,7 +262,7 @@ class AdvancedTrafficGenerator {
     const spikeDuration = 3000; // Spike lasts 3 seconds
     const spikeRps = this.config.rps * 5; // 5x normal RPS
     
-    console.log(`⚡ Mode: SPIKE | Base RPS: ${this.config.rps} | Spike RPS: ${spikeRps} | Duration: ${this.config.duration}s\n`);
+    console.log(`Mode: SPIKE | Base RPS: ${this.config.rps} | Spike RPS: ${spikeRps} | Duration: ${this.config.duration}s\n`);
 
     let nextSpike = Date.now() + spikeInterval;
     let inSpike = false;
@@ -271,7 +271,7 @@ class AdvancedTrafficGenerator {
       if (Date.now() >= nextSpike && !inSpike) {
         inSpike = true;
         const spikeEnd = Date.now() + spikeDuration;
-        console.log(`💥 SPIKE STARTED - ${spikeRps} RPS for ${spikeDuration}ms`);
+        console.log(`SPIKE STARTED - ${spikeRps} RPS for ${spikeDuration}ms`);
         
         while (Date.now() < spikeEnd && this.running) {
           const promises = [];
@@ -284,7 +284,7 @@ class AdvancedTrafficGenerator {
         
         inSpike = false;
         nextSpike = Date.now() + spikeInterval;
-        console.log(`✅ SPIKE ENDED`);
+        console.log(`SPIKE ENDED`);
       }
 
       if (!inSpike) {
@@ -304,7 +304,7 @@ class AdvancedTrafficGenerator {
     const endTime = Date.now() + (this.config.duration * 1000);
     const baseInterval = 1000 / this.config.rps;
     
-    console.log(`🎯 Mode: REALISTIC | RPS: ${this.config.rps} | Concurrent Users: ${this.config.concurrentUsers} | Duration: ${this.config.duration}s\n`);
+    console.log(`Mode: REALISTIC | RPS: ${this.config.rps} | Concurrent Users: ${this.config.concurrentUsers} | Duration: ${this.config.duration}s\n`);
 
     // Start concurrent user journey simulators
     const userJourneyPromises = [];
@@ -333,10 +333,10 @@ class AdvancedTrafficGenerator {
 
   // Demo mode - optimized for interview presentation
   async generateDemo() {
-    console.log(`🎬 Mode: DEMO | Generating interview-ready traffic...\n`);
+    console.log(`Mode: DEMO | Generating interview-ready traffic...\n`);
     
     // Phase 1: Initial ramp-up (30s)
-    console.log('📈 Phase 1: Ramp-up (30s)');
+    console.log('Phase 1: Ramp-up (30s)');
     await this.runPhase(30, async (elapsed) => {
       const rps = Math.min(5 + (elapsed / 30) * 15, 20);
       await this.executeRandomRequest();
@@ -344,7 +344,7 @@ class AdvancedTrafficGenerator {
     });
 
     // Phase 2: Steady load with user journeys (60s)
-    console.log('\n🎯 Phase 2: Steady load with user journeys (60s)');
+    console.log('\nPhase 2: Steady load with user journeys (60s)');
     const journeyPromises = [];
     for (let i = 0; i < 15; i++) {
       journeyPromises.push(this.runUserJourneyLoop(Date.now() + 60000, i + 1));
@@ -358,7 +358,7 @@ class AdvancedTrafficGenerator {
     await Promise.all(journeyPromises);
 
     // Phase 3: Spike test (20s)
-    console.log('\n⚡ Phase 3: Spike test (20s)');
+    console.log('\nPhase 3: Spike test (20s)');
     await this.runPhase(20, async () => {
       const promises = [];
       for (let i = 0; i < 10; i++) {
@@ -369,7 +369,7 @@ class AdvancedTrafficGenerator {
     });
 
     // Phase 4: Sustained high load (90s)
-    console.log('\n🔥 Phase 4: Sustained high load (90s)');
+    console.log('\nPhase 4: Sustained high load (90s)');
     const highLoadPromises = [];
     for (let i = 0; i < 20; i++) {
       highLoadPromises.push(this.runUserJourneyLoop(Date.now() + 90000, i + 1));
@@ -429,7 +429,7 @@ class AdvancedTrafficGenerator {
       ? ((this.stats.success / this.stats.total) * 100).toFixed(1) 
       : '0.0';
     
-    console.log(`\n📊 Stats [${elapsed}s]`);
+    console.log(`\nStats [${elapsed}s]`);
     console.log(`   Total Requests: ${this.stats.total} | Success: ${this.stats.success} | Errors: ${this.stats.errors}`);
     console.log(`   Current RPS: ${currentRps} | Success Rate: ${successRate}%`);
     console.log(`   User Journeys: ${this.stats.userJourneys} | Completed: ${this.stats.completedJourneys}`);
@@ -454,7 +454,7 @@ class AdvancedTrafficGenerator {
 
   async start() {
     this.running = true;
-    console.log('🚀 Advanced Traffic Generator Starting...');
+    console.log('Advanced Traffic Generator Starting...');
     console.log(`   Gateway: ${this.config.gatewayUrl}`);
     console.log(`   Mode: ${this.config.mode.toUpperCase()}`);
     console.log(`   Duration: ${this.config.duration}s\n`);
@@ -480,7 +480,7 @@ class AdvancedTrafficGenerator {
           await this.generateRealistic();
       }
     } catch (error) {
-      console.error('❌ Error:', error);
+      console.error('Error:', error);
     } finally {
       this.stop();
     }
@@ -488,7 +488,7 @@ class AdvancedTrafficGenerator {
 
   stop() {
     this.running = false;
-    console.log('\n\n🛑 Traffic Generation Complete');
+    console.log('\n\nTraffic Generation Complete');
     console.log('═══════════════════════════════════════════════════════');
     this.printFinalStats();
     console.log('═══════════════════════════════════════════════════════\n');
@@ -501,7 +501,7 @@ class AdvancedTrafficGenerator {
       ? ((this.stats.success / this.stats.total) * 100).toFixed(2) 
       : '0.00';
     
-    console.log(`\n📈 Final Statistics:`);
+    console.log(`\nFinal Statistics:`);
     console.log(`   Total Requests: ${this.stats.total}`);
     console.log(`   Successful: ${this.stats.success} (${successRate}%)`);
     console.log(`   Errors: ${this.stats.errors}`);
@@ -509,13 +509,13 @@ class AdvancedTrafficGenerator {
     console.log(`   User Journeys Started: ${this.stats.userJourneys}`);
     console.log(`   User Journeys Completed: ${this.stats.completedJourneys}`);
     
-    console.log(`\n📊 By Method:`);
+    console.log(`\nBy Method:`);
     Object.entries(this.stats.byMethod).forEach(([method, stats]) => {
       const rate = stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : '0.0';
       console.log(`   ${method}: ${stats.total} (${rate}% success)`);
     });
     
-    console.log(`\n📊 By Endpoint:`);
+    console.log(`\nBy Endpoint:`);
     Object.entries(this.stats.byEndpoint)
       .sort((a, b) => b[1].total - a[1].total)
       .forEach(([path, stats]) => {
@@ -529,20 +529,20 @@ class AdvancedTrafficGenerator {
 const generator = new AdvancedTrafficGenerator(config);
 
 process.on('SIGINT', () => {
-  console.log('\n\n⚠️  Received SIGINT, stopping gracefully...');
+  console.log('\n\nReceived SIGINT, stopping gracefully...');
   generator.stop();
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
-  console.log('\n\n⚠️  Received SIGTERM, stopping gracefully...');
+  console.log('\n\nReceived SIGTERM, stopping gracefully...');
   generator.stop();
   process.exit(0);
 });
 
 // Start generation
 generator.start().catch(error => {
-  console.error('❌ Fatal Error:', error);
+  console.error('Fatal Error:', error);
   process.exit(1);
 });
 

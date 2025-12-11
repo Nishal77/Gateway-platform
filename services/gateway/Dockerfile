@@ -36,5 +36,20 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# JVM optimizations for high throughput (1k-10k RPS)
+# -XX:+UseG1GC: Use G1 garbage collector for better latency
+# -XX:MaxGCPauseMillis: Target GC pause time
+# -Xmx: Maximum heap size (adjust based on available memory)
+# -Xms: Initial heap size (set to max for consistent performance)
+# -XX:+UseStringDeduplication: Reduce memory usage
+# -XX:+OptimizeStringConcat: Optimize string operations
+ENTRYPOINT ["java", \
+  "-XX:+UseG1GC", \
+  "-XX:MaxGCPauseMillis=200", \
+  "-Xmx512m", \
+  "-Xms512m", \
+  "-XX:+UseStringDeduplication", \
+  "-XX:+OptimizeStringConcat", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-jar", "app.jar"]
 

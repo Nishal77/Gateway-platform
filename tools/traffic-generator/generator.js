@@ -77,7 +77,7 @@ class TrafficGenerator {
     const interval = 1000 / this.rps; // milliseconds between requests
     const endTime = Date.now() + (this.duration * 1000);
     
-    console.log(`🚀 Starting traffic generation:`);
+    console.log(`Starting traffic generation:`);
     console.log(`   Gateway: ${this.gatewayUrl}`);
     console.log(`   RPS: ${this.rps}`);
     console.log(`   Duration: ${this.duration}s`);
@@ -109,7 +109,7 @@ class TrafficGenerator {
     const burstInterval = 5000; // 5 seconds between bursts
     
     while (Date.now() < endTime && this.running) {
-      console.log(`💥 Generating burst of ${this.burstSize} requests...`);
+      console.log(`Generating burst of ${this.burstSize} requests...`);
       
       const promises = [];
       for (let i = 0; i < this.burstSize; i++) {
@@ -134,7 +134,7 @@ class TrafficGenerator {
     const currentRps = (this.stats.total / elapsed).toFixed(2);
     const successRate = ((this.stats.success / this.stats.total) * 100).toFixed(1);
     
-    console.log(`📊 Stats [${elapsed}s]: Total=${this.stats.total}, ` +
+    console.log(`Stats [${elapsed}s]: Total=${this.stats.total}, ` +
                 `Success=${this.stats.success}, Errors=${this.stats.errors}, ` +
                 `RPS=${currentRps}, Success Rate=${successRate}%`);
   }
@@ -145,7 +145,7 @@ class TrafficGenerator {
 
   stop() {
     this.running = false;
-    console.log('\n🛑 Traffic generation stopped');
+    console.log('\nTraffic generation stopped');
     this.printStats();
   }
 }
@@ -175,7 +175,7 @@ process.on('SIGTERM', () => {
 generator.generateTraffic().then(() => {
   generator.stop();
 }).catch(error => {
-  console.error('❌ Error:', error);
+  console.error('Error:', error);
   process.exit(1);
 });
 

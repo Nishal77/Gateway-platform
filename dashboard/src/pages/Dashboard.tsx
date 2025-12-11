@@ -1,6 +1,7 @@
 import { useMetrics } from '../hooks/useMetrics'
 import { MetricCard } from '../components/MetricCard'
 import { SystemStatus } from '../components/SystemStatus'
+import { CapacityOverview } from '../components/CapacityOverview'
 import { EndpointStatus } from '../components/EndpointStatus'
 import { EndpointLoadTable } from '../components/EndpointLoadTable'
 import { TrafficDistribution } from '../components/TrafficDistribution'
@@ -83,6 +84,13 @@ export default function Dashboard() {
         <p className="text-muted-foreground">Real-time API analytics and metrics</p>
       </div>
 
+      {/* System Status and Capacity Overview - Prominent placement at top */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <SystemStatus />
+        <CapacityOverview />
+      </div>
+
+      {/* Key Metrics Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Total RPS"
@@ -111,16 +119,13 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Top 4 Most Visited Endpoints */}
-      <TopEndpoints />
-
       {/* Alerts Section - Prominent placement */}
       <Alerts />
 
-      {/* System Status and Endpoint Health */}
+      {/* System Health and Endpoint Status */}
       <div className="grid gap-4 md:grid-cols-2">
-        <SystemStatus />
         <EndpointStatus />
+        <TopEndpoints />
       </div>
 
       {/* Traffic Distribution */}

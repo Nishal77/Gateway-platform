@@ -12,13 +12,18 @@ spring:
     driver-class-name: org.postgresql.Driver
     # FAANG-level connection pooling
     hikari:
-      maximum-pool-size: 50
-      minimum-idle: 10
+      maximum-pool-size: 100
+      minimum-idle: 20
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
       leak-detection-threshold: 60000
       pool-name: AnalyticsHikariPool
+      data-source-properties:
+        reWriteBatchedInserts: true
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
   
   jpa:
     hibernate:
@@ -42,31 +47,31 @@ spring:
       timeout: 2000ms
       lettuce:
         pool:
-          max-active: 100
-          max-idle: 50
-          min-idle: 10
+          max-active: 200
+          max-idle: 100
+          min-idle: 20
           max-wait: 5000ms
 
 analytics:
   metrics:
     window-seconds: 60
-    aggregation-interval-ms: 10000
+    aggregation-interval-ms: 2000
     cache-ttl-minutes: 5
-  # Async processing configuration
+  # Async processing configuration - optimized for 1k-10k RPS
   batch:
-    size: 1000
-    flush-interval-ms: 1000
+    size: 5000
+    flush-interval-ms: 500
   queue:
-    capacity: 100000
-  workers: 4
+    capacity: 1000000
+  workers: 16
 
 # Enable async processing
 spring.task:
   execution:
     pool:
-      core-size: 8
-      max-size: 16
-      queue-capacity: 10000
+      core-size: 16
+      max-size: 32
+      queue-capacity: 50000
 
 management:
   endpoints:
